@@ -259,7 +259,8 @@
 
           <div class="status-change-row">
             <span class="status-label">更改为：</span>
-            <el-select v-model="editStatus" size="small" style="width: 140px;">
+            <el-select v-model="editStatus" size="small" style="width: 140px;" @change="handleStatusSelectChange">
+              <el-option label="已通过" value="approved" />
               <el-option label="已归档" value="archived" />
               <el-option label="已匹配" value="matched" />
               <el-option label="无效（作废）" value="cancelled" />
@@ -541,7 +542,6 @@ function isVisibleStatus(item: any) {
   return ['approved', 'matched', 'claimed'].includes(status)
 }
 
-
 async function fetchItemList() {
   loading.value = true
   try {
@@ -559,14 +559,16 @@ async function fetchItemList() {
 
     const res = await getAllItems(params)
     const resData = res.data?.data ?? res.data ?? {}
-    const list = (resData.list ?? resData.items ?? []).map((item: any) => ({
-      ...item,
-      id: item.id ?? item.ID,
-      img1: normalizeResourceUrl(item.img1),
-      img2: normalizeResourceUrl(item.img2),
-      img3: normalizeResourceUrl(item.img3),
-      img4: normalizeResourceUrl(item.img4),
-    })).filter((item: any) => isVisibleStatus(item))
+    const list = (resData.list ?? resData.items ?? [])
+      .map((item: any) => ({
+        ...item,
+        id: item.id ?? item.ID,
+        img1: normalizeResourceUrl(item.img1),
+        img2: normalizeResourceUrl(item.img2),
+        img3: normalizeResourceUrl(item.img3),
+        img4: normalizeResourceUrl(item.img4),
+      }))
+      .filter((item: any) => isVisibleStatus(item))
     if (!hasFilter) {
       itemList.value = list
       total.value = resData.total ?? list.length ?? 0
@@ -671,10 +673,16 @@ function getBountyText(item: any) {
   return `${value}元`
 }
 
+function normalizeEditableStatus(status: unknown) {
+  const value = String(status || '').toLowerCase()
+  if (['approved', 'archived', 'matched', 'cancelled'].includes(value)) return value
+  return 'approved'
+}
+
 function showItemDetail(item: any) {
   currentItem.value = { ...item }
   editMode.value = 'view'
-  editStatus.value = item.status || 'archived'
+  editStatus.value = normalizeEditableStatus(item.status)
   handleNote.value = ''
   editForm.title = item.title || ''
   editForm.campus = item.campus || campusOptions[0]
@@ -734,7 +742,7 @@ async function handleSaveInfo() {
   }
 }
 
-async function handleSaveStatus() {
+async function handleSaveStatus(options?: { skipConfirm?: boolean }) {
   if (saveLoading.value) return
   if (!canEditCurrentItem.value) {
     ElMessage.warning('仅招领帖可修改状态')
@@ -750,7 +758,9 @@ async function handleSaveStatus() {
           ? '标记为已匹配'
           : '标记为无效'
 
-    await ElMessageBox.confirm(`确定要将该帖子${statusLabel}吗？`, '确认操作', { type: 'warning' })
+    if (!options?.skipConfirm) {
+      await ElMessageBox.confirm(`确定要将该帖子${statusLabel}吗？`, '确认操作', { type: 'warning' })
+    }
 
     saveLoading.value = true
     if (editStatus.value === 'claimed') {
@@ -764,6 +774,10 @@ async function handleSaveStatus() {
         throw new Error(String((res as any)?.data?.msg || '更新失败'))
       }
     } else {
+      if (editStatus.value === 'matched') {
+        ElMessage.warning('“已匹配”请在认领申请审核通过后自动流转，物品管理不支持手动设置')
+        return
+      }
       const res = await updateItem(id, { status: editStatus.value, process_method: handleNote.value })
       const code = Number((res as any)?.data?.code ?? 200)
       if (code !== 200) {
@@ -780,6 +794,13 @@ async function handleSaveStatus() {
   } finally {
     saveLoading.value = false
   }
+}
+
+function handleStatusSelectChange(val: string) {
+  if (val !== 'matched') return
+  if (!currentItem.value) return
+  ElMessage.warning('“已匹配”由认领审核通过自动变更，不能在这里手动设置')
+  editStatus.value = normalizeEditableStatus(currentItem.value.status)
 }
 
 function resetDetail() {

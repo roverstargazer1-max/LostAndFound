@@ -169,7 +169,7 @@ import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Picture } from '@element-plus/icons-vue'
-import { getPendingItems, approveItem, rejectItem, getAllItems } from '@/api/admin'
+import { getPendingItems, approveItem, rejectItem } from '@/api/admin'
 import { useAuditHistoryStore } from '@/stores/auditHistory'
 import { normalizeResourceUrl } from '@/utils/url'
 
@@ -201,24 +201,9 @@ async function fetchPendingList() {
     const normalized = list.map(normalizeItem)
     const primaryTotal = Number(resData.total ?? normalized.length ?? 0)
 
-    // Compatibility fallback:
-    // some backends for /items/pending may return only one row due to paging param differences.
-    const fallback = await getAllItems({ page: currentPage.value, pageSize: pageSize.value, status: 'pending' })
-    const fallbackData = fallback.data?.data ?? fallback.data ?? {}
-    const fallbackList = normalizeList(fallbackData)
-    const pendingOnly = fallbackList
-      .map(normalizeItem)
-      .filter((item: any) => String(item.status || '').toLowerCase() === 'pending')
-    const fallbackTotal = Number(fallbackData.total ?? pendingOnly.length ?? 0)
-
-    if (pendingOnly.length > normalized.length) {
-      auditList.value = pendingOnly
-      total.value = fallbackTotal
-      return
-    }
-
     auditList.value = normalized
     total.value = primaryTotal
+    window.dispatchEvent(new CustomEvent('admin-pending-refresh'))
   } catch (error: unknown) {
     const errMsg = error instanceof Error ? error.message : '获取待审核列表失败'
     ElMessage.error(errMsg)
@@ -299,7 +284,8 @@ async function handleApprove(row: any) {
     auditHistoryStore.addRecord(row, 'approved', undefined, 'item')
     ElMessage.success('审核通过')
     detailVisible.value = false
-    fetchPendingList()
+    await fetchPendingList()
+    window.dispatchEvent(new CustomEvent('admin-pending-refresh'))
   } catch (error: unknown) {
     if (error === 'cancel' || error === 'close') return
     const errMsg = error instanceof Error ? error.message : '审核失败'
@@ -326,7 +312,8 @@ async function handleReject() {
     rejectVisible.value = false
     rejectReason.value = ''
     detailVisible.value = false
-    fetchPendingList()
+    await fetchPendingList()
+    window.dispatchEvent(new CustomEvent('admin-pending-refresh'))
   } catch (error: unknown) {
     const errMsg = error instanceof Error ? error.message : '驳回失败'
     ElMessage.error(errMsg)
@@ -511,5 +498,4 @@ onMounted(() => {
   margin-top: 12px;
 }
 </style>
-
 

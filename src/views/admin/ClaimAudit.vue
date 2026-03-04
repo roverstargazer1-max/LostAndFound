@@ -357,6 +357,7 @@ async function fetchClaimList() {
       id: item.id ?? item.ID,
     }))
     total.value = resData.total ?? 0
+    window.dispatchEvent(new CustomEvent('admin-pending-refresh'))
   } catch (error: unknown) {
     const errMsg = error instanceof Error ? error.message : '获取认领列表失败'
     ElMessage.error(errMsg)
@@ -417,7 +418,8 @@ async function doRejectClaim() {
     detailVisible.value = false
     showRejectInput.value = false
     rejectReason.value = ''
-    fetchClaimList()
+    await fetchClaimList()
+    window.dispatchEvent(new CustomEvent('admin-pending-refresh'))
   } catch (error: unknown) {
     const errMsg = error instanceof Error ? error.message : '驳回失败'
     ElMessage.error(errMsg)
@@ -444,7 +446,8 @@ async function handleClaimApprove(row: any) {
     auditHistoryStore.addRecord(buildHistoryItemFromClaim(row), 'approved', undefined, 'claim')
     ElMessage.success('认领申请审核通过')
     detailVisible.value = false
-    fetchClaimList()
+    await fetchClaimList()
+    window.dispatchEvent(new CustomEvent('admin-pending-refresh'))
   } catch (error: unknown) {
     if (error === 'cancel' || error === 'close') return
     const errMsg = error instanceof Error ? error.message : '审核失败'

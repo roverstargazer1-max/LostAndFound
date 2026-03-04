@@ -82,12 +82,12 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessageBox, ElMessage } from 'element-plus'
 import { ArrowDown } from '@element-plus/icons-vue'
 import { useUserStore } from '@/stores/user'
-import { getPendingItems, getAnnouncements } from '@/api/admin'
+import { getPendingItems, getPendingClaims, getAnnouncements } from '@/api/admin'
 import { logoutApi } from '@/api/user'
 
 const route = useRoute()
@@ -95,7 +95,8 @@ const router = useRouter()
 const userStore = useUserStore()
 
 const pendingItemCount = ref(0)
-const totalPending = computed(() => pendingItemCount.value)
+const pendingClaimCount = ref(0)
+const totalPending = computed(() => pendingItemCount.value + pendingClaimCount.value)
 
 const noticeDialogVisible = ref(false)
 const systemNotices = ref<any[]>([])
@@ -140,12 +141,22 @@ function confirmNotices() {
 }
 
 async function fetchPendingCounts() {
-  try {
-    const res = await getPendingItems({ page: 1, pageSize: 1 })
-    const data = res.data?.data ?? res.data ?? {}
-    pendingItemCount.value = data.total ?? 0
-  } catch {
+  const readTotal = (payload: any) => Number(payload?.data?.total ?? payload?.total ?? 0)
+  const [itemsResult, claimsResult] = await Promise.allSettled([
+    getPendingItems({ page: 1, pageSize: 1 }),
+    getPendingClaims({ page: 1, pageSize: 1 }),
+  ])
+
+  if (itemsResult.status === 'fulfilled') {
+    pendingItemCount.value = readTotal(itemsResult.value?.data)
+  } else {
     pendingItemCount.value = 0
+  }
+
+  if (claimsResult.status === 'fulfilled') {
+    pendingClaimCount.value = readTotal(claimsResult.value?.data)
+  } else {
+    pendingClaimCount.value = 0
   }
 }
 
@@ -174,8 +185,13 @@ async function handleLogout() {
 }
 
 onMounted(() => {
+  window.addEventListener('admin-pending-refresh', fetchPendingCounts)
   fetchPendingCounts()
   fetchAndShowNotices()
+})
+
+onBeforeUnmount(() => {
+  window.removeEventListener('admin-pending-refresh', fetchPendingCounts)
 })
 </script>
 
