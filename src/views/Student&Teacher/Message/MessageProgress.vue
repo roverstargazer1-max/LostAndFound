@@ -414,6 +414,7 @@ onMounted(() => {
   border-radius: 8px;
   overflow: hidden;
   flex-shrink: 0;
+  content: right;
 }
 
 .img-fallback {
