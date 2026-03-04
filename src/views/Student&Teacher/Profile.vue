@@ -418,7 +418,7 @@ import { useRouter } from 'vue-router'
 import type { FormInstance, FormRules } from 'element-plus'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { EditPen, UserFilled } from '@element-plus/icons-vue'
-import { updateUserInfoApi, changePasswordApi, getMyClaimDetailApi, getMyClaimsApi, getMyItemsApi, getUserInfoApi, logoutApi, submitFeedbackApi, type MyClaimItem, type MyItem, type MyItemStatus } from '@/api/user'
+import { updateUserInfoApi, changePasswordApi, getMyClaimDetailApi, getMyClaimsApi, getMyItemsApi, getUserInfoApi, logoutApi, submitFeedbackApi, type FeedbackType, type MyClaimItem, type MyItem, type MyItemStatus } from '@/api/user'
 import { deleteMyItemApi, updateMyItemApi } from '@/api/Publish'
 import { useUserStore } from '@/stores/user'
 import { useChatSessionStore } from '@/stores/chatSession'
@@ -641,6 +641,10 @@ const normalizeClaimStatus = (status?: string | number): string => {
 
 const hasCodeField = (data?: { code?: number }) => {
 	return Number(data?.code) === 200
+}
+
+const mapFeedbackTypeToApiType = (type: '反馈' | '投诉'): FeedbackType => {
+	return type === '投诉' ? 'complaint' : 'suggestion'
 }
 
 const collectItemImages = (item?: MyItem) => {
@@ -1176,7 +1180,7 @@ const handleFeedbackSubmit = async () => {
 	try {
     const contact = (profile.phone || userStore.username || '未填写').trim()
     const response = await submitFeedbackApi({
-      type: feedbackType.value,
+			type: mapFeedbackTypeToApiType(feedbackType.value),
       content,
       contact
     })
