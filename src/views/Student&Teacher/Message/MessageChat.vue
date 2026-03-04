@@ -413,6 +413,11 @@ onMounted(async () => {
   color: #333;
 }
 
+.item-main {
+  flex: 1;
+  min-width: 0;
+}
+
 .item-empty {
   margin: 0;
   color: #999;
@@ -423,6 +428,8 @@ onMounted(async () => {
   height: 68px;
   border-radius: 8px;
   overflow: hidden;
+  margin-left: auto;
+  flex-shrink: 0;
 }
 
 .confirm-btn {
