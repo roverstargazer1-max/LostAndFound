@@ -233,7 +233,10 @@
 
 		<el-dialog v-model="managePublishedVisible" width="92%" top="6vh" destroy-on-close class="manage-dialog" align-center>
 			<template #header>
-				<div class="manage-title">管理我发布的帖子</div>
+				<div>
+					<div class="manage-title">管理我发布的帖子</div>
+					<div class="manage-title-hint">已驳回的原因请前往消息通知里的帖子动态查看</div>
+				</div>
 			</template>
 			<el-table :data="managePublishedList" v-loading="managePublishedLoading" class="manage-table" border>
 				<el-table-column label="#" width="56" align="center">
@@ -1727,6 +1730,13 @@ onMounted(async () => {
 	font-size: 20px;
 	font-weight: 600;
 	padding-left: 12px;
+}
+
+.manage-title-hint {
+	font-size: 13px;
+	color: #909399;
+	padding-left: 12px;
+	margin-top: 4px;
 }
 
 .manage-table {
