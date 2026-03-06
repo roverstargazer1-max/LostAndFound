@@ -4,7 +4,7 @@
       <div class="forget-header">
         <div class="logo-circle"></div>
         <h2 class="forget-title">忘记密码</h2>
-        <p class="forget-subtitle">请输入你账号对应的初始密码和你的身份证号后六位验证身份</p>
+        <p class="forget-subtitle">请输入你账号对应的初始密码或你的身份证号后六位验证身份</p>
       </div>
       <form class="forget-form">
         <div class="form-group">
