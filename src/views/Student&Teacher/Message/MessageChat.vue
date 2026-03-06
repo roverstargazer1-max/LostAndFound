@@ -42,7 +42,7 @@
     </div>
 
     <div v-if="sessionEnded" class="session-ended-bar">
-      <span class="ended-text">你已确认招领&emsp;临时对话结束</span>
+      <span class="ended-text">你已确认招领  临时对话结束</span>
     </div>
     <div v-else class="input-bar">
       <input
@@ -607,16 +607,17 @@ onMounted(async () => {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 14px 0;
-  border-top: 1px solid #edd7b9;
-  background: #fff;
-  border-radius: 8px 8px 0 0;
+  margin-top: -14px;
+  padding: 10px 0 14px;
+  background: #fdf6ec;
+  border-radius: 0 0 8px 8px;
 }
 
 .ended-text {
-  color: #e6a23c;
+  color: #7a7a7a;
   font-size: 14px;
-  font-style: italic;
+  font-style: normal;
+  font-weight: 500;
   user-select: none;
 }
 </style>
