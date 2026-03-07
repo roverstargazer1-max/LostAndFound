@@ -14,7 +14,7 @@
       <el-button v-if="showConfirmButton" type="warning" round class="confirm-btn" @click="handleConfirmClaim">
         确认招领
       </el-button>
-      <el-button v-else-if="String(route.query.can_confirm || '') === '1'" type="success" round class="confirm-btn" disabled>
+      <el-button v-else-if="sessionEnded || String(route.query.can_confirm || '') === '1'" type="success" round class="confirm-btn" disabled>
         已招领
       </el-button>
     </div>
@@ -41,7 +41,10 @@
       </div>
     </div>
 
-    <div class="input-bar">
+    <div v-if="sessionEnded" class="session-ended-bar">
+      <span class="ended-text">你已确认招领  临时对话结束</span>
+    </div>
+    <div v-else class="input-bar">
       <input
         ref="imageInputRef"
         type="file"
@@ -99,7 +102,34 @@ const itemInfo = computed(() => ({
 }))
 
 const claimConfirmed = ref(false)
-const showConfirmButton = computed(() => String(route.query.can_confirm || '') === '1' && !claimConfirmed.value)
+const sessionEnded = ref(false)
+
+const getSessionEndedKey = () => {
+  const targetId = activeTargetId.value
+  const itemId = Number(route.query.item_id || 0)
+  if (!targetId) return ''
+  return `chat_ended_${targetId}_${itemId}`
+}
+
+const loadSessionEndedState = () => {
+  const key = getSessionEndedKey()
+  if (!key) {
+    sessionEnded.value = false
+    return
+  }
+  sessionEnded.value = localStorage.getItem(key) === '1'
+  claimConfirmed.value = sessionEnded.value
+}
+
+const saveSessionEnded = () => {
+  const key = getSessionEndedKey()
+  if (key) {
+    localStorage.setItem(key, '1')
+  }
+  sessionEnded.value = true
+}
+
+const showConfirmButton = computed(() => String(route.query.can_confirm || '') === '1' && !claimConfirmed.value && !sessionEnded.value)
 
 const getSelfName = () => String(localStorage.getItem('nickname') || localStorage.getItem('username') || '我')
 
@@ -361,6 +391,7 @@ const handleConfirmClaim = async () => {
     }
     ElMessage.success(response?.data?.msg || '确认招领成功')
     claimConfirmed.value = true
+    saveSessionEnded()
   } catch (error) {
     if (error !== 'cancel') {
       ElMessage.error('确认招领失败，请稍后重试')
@@ -377,6 +408,7 @@ watch(
         target_name: String(route.query.target_name || `用户${targetId}`)
       })
     }
+    loadSessionEndedState()
     await loadHistory()
   },
   { immediate: true }
@@ -569,5 +601,23 @@ onMounted(async () => {
 .send-btn {
   width: 72px;
   height: 36px;
+}
+
+.session-ended-bar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: -14px;
+  padding: 10px 0 14px;
+  background: #fdf6ec;
+  border-radius: 0 0 8px 8px;
+}
+
+.ended-text {
+  color: #7a7a7a;
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 500;
+  user-select: none;
 }
 </style>
