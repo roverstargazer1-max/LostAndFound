@@ -101,6 +101,7 @@
 </template>
 
 <script setup lang="ts">
+// 页面注释：FeedbackCenter 页面的状态管理、交互处理与接口调用逻辑。
 import { ref, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
 import { getFeedbacks, replyFeedback } from '@/api/super'
@@ -216,4 +217,7 @@ onMounted(() => {
   margin-top: 8px;
 }
 </style>
+
+
+
 

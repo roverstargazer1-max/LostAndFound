@@ -321,6 +321,7 @@
 </template>
 
 <script setup lang="ts">
+// 页面注释：ItemManagement 页面的状态管理、交互处理与接口调用逻辑。
 import { ref, reactive, computed, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Search, MoreFilled } from '@element-plus/icons-vue'
@@ -553,9 +554,7 @@ async function fetchItemList() {
       Boolean(searchKeyword.value.trim()) ||
       Boolean(filterTime.value)
 
-    const params: any = hasFilter
-      ? { page: 1, pageSize: 9999 }
-      : { page: currentPage.value, pageSize: pageSize.value }
+    const params: any = { page: 1, pageSize: 9999 }
 
     const res = await getAllItems(params)
     const resData = res.data?.data ?? res.data ?? {}
@@ -569,45 +568,50 @@ async function fetchItemList() {
         img4: normalizeResourceUrl(item.img4),
       }))
       .filter((item: any) => isVisibleStatus(item))
-    if (!hasFilter) {
-      itemList.value = list
-      total.value = resData.total ?? list.length ?? 0
-      fullItemList.value = list
+
+    // 始终获取全部数据，前端自己处理分页（后端 total 不准确）
+    fullItemList.value = list
+    total.value = list.length
+
+    // 有筛选条件时，先进行筛选
+    if (hasFilter) {
+      const keyword = searchKeyword.value.trim().toLowerCase()
+      const daysRange = parseTimeRange(filterTime.value)
+      const now = Date.now()
+
+      const filtered = fullItemList.value.filter((item: any) => {
+        if (!matchPostType(item, filterType.value)) return false
+        if (filterCampus.value && String(item.campus || '') !== String(filterCampus.value)) return false
+        if (filterCategory.value && String(item.category || '') !== String(filterCategory.value)) return false
+        if (filterStatus.value && String(item.status) !== String(filterStatus.value)) return false
+
+        if (keyword) {
+          const title = String(item.title || '').toLowerCase()
+          const category = String(item.category || '').toLowerCase()
+          const location = String(item.location || '').toLowerCase()
+          if (!title.includes(keyword) && !category.includes(keyword) && !location.includes(keyword)) return false
+        }
+
+        if (daysRange) {
+          const created = new Date(item.CreatedAt || item.created_at || item.time || '').getTime()
+          if (!created || Number.isNaN(created)) return false
+          const diffDays = Math.floor((now - created) / (24 * 3600 * 1000))
+          if (diffDays < daysRange.min) return false
+          if (daysRange.max !== null && diffDays >= daysRange.max) return false
+        }
+
+        return true
+      })
+
+      total.value = filtered.length
+      const start = (currentPage.value - 1) * pageSize.value
+      itemList.value = filtered.slice(start, start + pageSize.value)
       return
     }
 
-    fullItemList.value = list
-    const keyword = searchKeyword.value.trim().toLowerCase()
-    const daysRange = parseTimeRange(filterTime.value)
-    const now = Date.now()
-
-    const filtered = fullItemList.value.filter((item: any) => {
-      if (!matchPostType(item, filterType.value)) return false
-      if (filterCampus.value && String(item.campus || '') !== String(filterCampus.value)) return false
-      if (filterCategory.value && String(item.category || '') !== String(filterCategory.value)) return false
-      if (filterStatus.value && String(item.status) !== String(filterStatus.value)) return false
-
-      if (keyword) {
-        const title = String(item.title || '').toLowerCase()
-        const category = String(item.category || '').toLowerCase()
-        const location = String(item.location || '').toLowerCase()
-        if (!title.includes(keyword) && !category.includes(keyword) && !location.includes(keyword)) return false
-      }
-
-      if (daysRange) {
-        const created = new Date(item.CreatedAt || item.created_at || item.time || '').getTime()
-        if (!created || Number.isNaN(created)) return false
-        const diffDays = Math.floor((now - created) / (24 * 3600 * 1000))
-        if (diffDays < daysRange.min) return false
-        if (daysRange.max !== null && diffDays >= daysRange.max) return false
-      }
-
-      return true
-    })
-
-    total.value = filtered.length
+    // 无筛选时，直接分页
     const start = (currentPage.value - 1) * pageSize.value
-    itemList.value = filtered.slice(start, start + pageSize.value)
+    itemList.value = list.slice(start, start + pageSize.value)
   } catch (error: unknown) {
     const errMsg = error instanceof Error ? error.message : '获取物品列表失败'
     ElMessage.error(errMsg)
@@ -970,3 +974,6 @@ onMounted(() => {
   }
 }
 </style>
+
+
+

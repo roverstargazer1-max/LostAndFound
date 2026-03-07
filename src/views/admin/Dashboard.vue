@@ -222,6 +222,7 @@
 </template>
 
 <script setup lang="ts">
+// 页面注释：Dashboard 页面的状态管理、交互处理与接口调用逻辑。
 import { ref, computed, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
 import {
@@ -620,4 +621,7 @@ onMounted(() => {
   padding: 24px 0;
 }
 </style>
+
+
+
 

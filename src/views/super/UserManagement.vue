@@ -141,6 +141,7 @@
 </template>
 
 <script setup lang="ts">
+// 页面注释：UserManagement 页面的状态管理、交互处理与接口调用逻辑。
 import { computed, onMounted, reactive, ref, watch } from 'vue'
 import { ElMessage } from 'element-plus'
 import { createAdmin, getUserList, sendMessage, updateUserStatus } from '@/api/super'
@@ -647,4 +648,7 @@ onMounted(fetchUsers)
   }
 }
 </style>
+
+
+
 

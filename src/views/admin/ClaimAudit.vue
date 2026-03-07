@@ -169,6 +169,7 @@
 </template>
 
 <script setup lang="ts">
+// 页面注释：ClaimAudit 页面的状态管理、交互处理与接口调用逻辑。
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
@@ -486,4 +487,7 @@ onMounted(() => {
 .reject-input-area h4 { margin: 0 0 10px; font-size: 15px; color: #333; }
 .claim-detail-footer { display: flex; justify-content: center; gap: 16px; margin-top: 20px; padding-bottom: 8px; }
 </style>
+
+
+
 

@@ -100,6 +100,7 @@
 </template>
 
 <script setup lang="ts">
+// 页面注释：SuperNotice 页面的状态管理、交互处理与接口调用逻辑。
 import { computed, onMounted, reactive, ref, watch } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { createSystemAnnouncement, deleteAnnouncement, getAnnouncements, reviewAnnouncement } from '@/api/super'
@@ -496,4 +497,7 @@ onMounted(fetchNotices)
   }
 }
 </style>
+
+
+
 

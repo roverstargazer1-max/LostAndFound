@@ -1,5 +1,7 @@
 ﻿import request from '@/utils/request'
 
+// 管理员端接口注释：统一封装 admin 侧的审核、公告和统计相关请求。
+
 // ==================== 类型定义 ====================
 
 /** 驳回审核请求  */
@@ -172,3 +174,4 @@ export function exportStatsCSV() {
     responseType: 'blob'  // CSV 文件需要 blob 类型
   })
 }
+

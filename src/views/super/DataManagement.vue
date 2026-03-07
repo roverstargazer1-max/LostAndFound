@@ -202,6 +202,7 @@
 </template>
 
 <script setup lang="ts">
+// 页面注释：DataManagement 页面的状态管理、交互处理与接口调用逻辑。
 import { computed, ref } from 'vue'
 import { ElMessage } from 'element-plus'
 import { cleanupExpiredData } from '@/api/super'
@@ -432,4 +433,7 @@ function getHistoryRowClass({ row }: { row: any }) {
   .top-grid, .clean-grid { grid-template-columns: 1fr; }
 }
 </style>
+
+
+
 

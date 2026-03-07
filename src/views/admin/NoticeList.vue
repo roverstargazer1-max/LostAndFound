@@ -144,6 +144,7 @@
 </template>
 
 <script setup lang="ts">
+// 页面注释：NoticeList 页面的状态管理、交互处理与接口调用逻辑。
 import { ref, reactive, onMounted, computed } from 'vue'
 import { ElMessage } from 'element-plus'
 import { Bell, ArrowDown, FolderOpened, Flag } from '@element-plus/icons-vue'
@@ -585,5 +586,8 @@ onMounted(() => {
   transform: translateY(6px);
 }
 </style>
+
+
+
 
 

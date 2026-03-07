@@ -43,6 +43,7 @@
 </template>
 
 <script setup lang="ts">
+// 页面注释：SuperLayout 页面的状态管理、交互处理与接口调用逻辑。
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { ArrowDown } from '@element-plus/icons-vue'
@@ -100,3 +101,6 @@ async function handleLogout() {
 .fade-enter-active, .fade-leave-active { transition: opacity 0.2s; }
 .fade-enter-from, .fade-leave-to { opacity: 0; }
 </style>
+
+
+
