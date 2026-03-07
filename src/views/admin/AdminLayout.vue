@@ -87,7 +87,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { ElMessageBox, ElMessage } from 'element-plus'
 import { ArrowDown } from '@element-plus/icons-vue'
 import { useUserStore } from '@/stores/user'
-import { getPendingItems, getPendingClaims, getAnnouncements } from '@/api/admin'
+import { getAllItems, getPendingClaims, getAnnouncements } from '@/api/admin'
 import { logoutApi } from '@/api/user'
 
 const route = useRoute()
@@ -143,7 +143,7 @@ function confirmNotices() {
 async function fetchPendingCounts() {
   const readTotal = (payload: any) => Number(payload?.data?.total ?? payload?.total ?? 0)
   const [itemsResult, claimsResult] = await Promise.allSettled([
-    getPendingItems({ page: 1, pageSize: 1 }),
+    getAllItems({ page: 1, pageSize: 1, status: 'pending' }),
     getPendingClaims({ page: 1, pageSize: 1 }),
   ])
 

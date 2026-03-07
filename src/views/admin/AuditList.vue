@@ -170,7 +170,7 @@ import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Picture } from '@element-plus/icons-vue'
-import { getPendingItems, approveItem, rejectItem } from '@/api/admin'
+import { getAllItems, approveItem, rejectItem } from '@/api/admin'
 import { useAuditHistoryStore } from '@/stores/auditHistory'
 import { normalizeResourceUrl } from '@/utils/url'
 
@@ -193,9 +193,10 @@ const submittingAction = ref<'approve' | 'reject' | ''>('')
 async function fetchPendingList() {
   loading.value = true
   try {
-    const res = await getPendingItems({
+    const res = await getAllItems({
       page: currentPage.value,
-      pageSize: pageSize.value
+      pageSize: pageSize.value,
+      status: 'pending'
     })
     const resData = res.data?.data ?? res.data ?? {}
     const list = normalizeList(resData)
@@ -499,7 +500,6 @@ onMounted(() => {
   margin-top: 12px;
 }
 </style>
-
 
 
 
